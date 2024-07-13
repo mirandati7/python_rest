@@ -8,8 +8,9 @@ app = Flask(__name__)
 
 @app.route("/livros/<int:id>", methods=["GET"])
 def get_livro(id):
-    print(" ID Livro > " + str(id))
-    return jsonify("{ 'nome':  'Livro Python 21 dias' }")
+   conexao = conecta_db()
+   livros = consultar_por_id(conexao,id)
+   return jsonify(livros)
 
 @app.route("/livros", methods=["POST"])
 def inserir_livro():

@@ -27,7 +27,7 @@ def consultar(conexao):
 
 def consultar_por_id(conexao, id):
     cursor = conexao.cursor()
-    cursor.execute("select id,nome from livro where id = " +id)
+    cursor.execute("select id,nome from livro where id = %s",[id])
     registro = cursor.fetchone()
     item = {
         "id": registro[0],
@@ -52,6 +52,5 @@ def alterar(conexao, id, nome):
 def deletar(conexao, id):
     cursor = conexao.cursor()
     sql_delete = "delete from  livro where id =  %s"
-    dados = (id)
-    cursor.execute(sql_delete,id)
+    cursor.execute(sql_delete,[id])
     conexao.commit()
