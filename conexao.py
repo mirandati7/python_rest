@@ -8,3 +8,5 @@ def conecta_db():
                             password="postgres",
                             port=5432)
     return con
+
+
