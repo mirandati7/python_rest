@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 
-from cadastro_autor import listar_autores
+from cadastro_autor import (alterar_autor_bd, consultar_autor_por_id_bd,
+                            deletar_autor_bd, inserir_autor_bd, listar_autores)
 from cadastro_livro import (alterar, consultar, consultar_por_id, deletar,
                             inserir)
 from conexao import conecta_db
@@ -49,6 +50,36 @@ def listar_todos_autores():
     autores = listar_autores(conexao)
     return jsonify(autores)
 
+
+@app.route("/autores", methods=["POST"])
+def inserir_autor():
+    conexao = conecta_db()
+    data = request.get_json()
+    nome = data["nome"]
+    inserir_autor_bd(conexao,nome)
+    return jsonify(data)
+
+@app.route("/autores/<int:id>", methods=["PUT"])
+def update_autor(id):
+    conexao = conecta_db()
+    data = request.get_json()
+    nome = data["nome"]
+    alterar_autor_bd(conexao,int(id),nome)
+    return jsonify(data)
+
+
+@app.route("/autores/<int:id>", methods=["DELETE"])
+def excluir_autor(id):
+    conexao = conecta_db()
+    deletar_autor_bd(conexao,id)
+    return jsonify({"message": "Autor deletado com sucesso" })
+
+
+@app.route("/autores/<int:id>", methods=["GET"])
+def consultar_autor_por_id(id):
+    conexao = conecta_db()
+    autor = consultar_autor_por_id_bd(conexao,id)
+    return jsonify(autor)
 
 if __name__ == "__main__":
     app.run(debug=True)
