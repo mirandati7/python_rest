@@ -23,7 +23,7 @@ def inserir_usuario_bd(conexao, login,senha):
     print(senha_criptografada)
 
     cursor = conexao.cursor()
-    cursor.execute("insert into usuario (login,senha)  values ('"+ login +  "','"+ str(senha_criptografada) +  "')")
+    cursor.execute("insert into usuario (login,senha)  values (%s, %s)", (login,senha_criptografada))
     conexao.commit()
 
 def alterar_usuario_bd(conexao, id, login,senha):
