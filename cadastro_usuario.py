@@ -52,10 +52,19 @@ def consultar_usuario_por_id_bd(conexao, id):
 def verificar_login(conexao, login,senha):
     cursor = conexao.cursor()
     cursor.execute(" select id,login,senha from usuario"+
-                   " where login = %s and senha =%s", (login,senha))
+                   " where login = '" + login+ "'")
     registro = cursor.fetchone()
 
-    if registro is None:
-        return False
+    if registro:
+        senha_do_banco = registro[2]
+        senha_criptografada = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
+        print("--"+ senha_criptografada.decode("utf-8"))
+        print("b--" +senha_do_banco)
+
+        if bcrypt.checkpw(senha_do_banco, senha_criptografada):
+            return "Login bem sucedido"
+        else:
+            return "Login falhou. Verifique o usuario e a senha"
     else:
-        return True
+        return "Login falhou. Verifique o usuario!"
+
