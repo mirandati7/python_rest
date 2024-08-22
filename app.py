@@ -8,10 +8,12 @@ from cadastro_livro import (alterar, consultar, consultar_por_id, deletar,
 from cadastro_usuario import (alterar_usuario_bd, consultar_usuario_por_id_bd,
                               deletar_usuario_bd, inserir_usuario_bd,
                               listar_usuarios, verificar_login)
+
+from cadastro_editora import inserir_editora_bd
+
 from conexao import conecta_db
 
 app = Flask(__name__)
-api = Api(app, doc='/swagger/')
 
 @app.route("/livros/<int:id>", methods=["GET"])
 def get_livro(id):
@@ -24,7 +26,9 @@ def inserir_livro():
     conexao = conecta_db()
     data = request.get_json()
     nome=data["nome"]
-    inserir(conexao,nome)
+    id_editora=data["id_editora"]
+    id_autor=data["id_autor"]
+    inserir(conexao,nome,id_editora,id_autor)
     return jsonify(data)
 
 @app.route("/livros/<int:id>", methods=["PUT"])
@@ -129,14 +133,24 @@ def consultar_usuario_por_id(id):
 
 @app.route("/autenticar", methods=["POST"])
 def autenticar():
+    print("Teste autenticar")
     conexao = conecta_db()
     data = request.get_json()
     login = data["login"]
     senha = data["senha"]
+    print(login)
+    print(senha)
     resultado = verificar_login(conexao,login,senha)
-    return jsonify(resultado)
+    return jsonify({"message": " sucesso" })
 
 
+@app.route("/editoras", methods=["POST"])
+def inserir_editora():
+    conexao = conecta_db()
+    data = request.get_json()
+    nome = data["nome"]
+    inserir_editora_bd(conexao,nome)
+    return jsonify(data)
 
 
 

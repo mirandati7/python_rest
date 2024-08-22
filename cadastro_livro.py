@@ -35,10 +35,11 @@ def consultar_por_id(conexao, id):
     }
     return item
 
-def inserir(conexao, nome):
+def inserir(conexao, nome, id_editora,id_autor):
     cursor = conexao.cursor()
-    sql_insert = "insert into livro (nome) values ('"+ nome +  "')"
-    cursor.execute(sql_insert)
+    sql_insert = "insert into livro (nome,id_editora,id_autor) values (%s, %s,%s)"
+    dados = (nome,id_editora,id_autor)
+    cursor.execute(sql_insert,dados)
     conexao.commit()
         
 def alterar(conexao, id, nome):
