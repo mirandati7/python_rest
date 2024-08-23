@@ -13,13 +13,24 @@ from conexao import conecta_db
 def consultar(conexao):
     livros = []
     cursor = conexao.cursor()
-    cursor.execute("select id,nome from livro")
+    select_livro = """
+        select livro.id   as livro_id,
+               livro.nome  as livro_nome,
+               autor.nome  as autor_nome,
+               editora.nome as editora_nome
+                      from livro
+        inner join autor    on (livro.id_autor = autor.id)
+        inner join editora  on (livro.id_editora = editora.id)
+    """
+    cursor.execute(select_livro)
     registros = cursor.fetchall()
     print("|-----------------------------------|")
     for registro in registros:
         item = {
             "id": registro[0],
-            "nome": registro[1]
+            "nome_livro": registro[1],
+            "nome_autor": registro[2],
+            "nome_editora": registro[3]
         }
         livros.append(item)
     return livros

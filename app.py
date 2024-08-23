@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_restx import Api, Resource
+from flask_bcrypt import Bcrypt
 
 from cadastro_autor import (alterar_autor_bd, consultar_autor_por_id_bd,
                             deletar_autor_bd, inserir_autor_bd, listar_autores)
@@ -12,8 +13,20 @@ from cadastro_usuario import (alterar_usuario_bd, consultar_usuario_por_id_bd,
 from cadastro_editora import inserir_editora_bd
 
 from conexao import conecta_db
+#
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
+
+app.config['JWT_SECRET_KEY'] = 'designcursos'  # Use uma chave segura em produção
+jwt = JWTManager(app)
+
+
+users = {
+    "user1": "password1",
+    "user2": "password2"
+}
 
 @app.route("/livros/<int:id>", methods=["GET"])
 def get_livro(id):
@@ -140,8 +153,11 @@ def autenticar():
     senha = data["senha"]
     print(login)
     print(senha)
+    pw_hash = bcrypt.generate_password_hash(senha)
+    pw_validacao = bcrypt.check_password_hash(pw_hash, senha)
+    print(pw_validacao)
     resultado = verificar_login(conexao,login,senha)
-    return jsonify({"message": " sucesso" })
+    return jsonify({"message":  resultado })
 
 
 @app.route("/editoras", methods=["POST"])
@@ -151,6 +167,30 @@ def inserir_editora():
     nome = data["nome"]
     inserir_editora_bd(conexao,nome)
     return jsonify(data)
+
+
+@app.route("/login", methods = ['POST'])
+def login():
+
+    if not request.is_json:
+        return jsonify({ "msg": "Json inválido !"}), 400 
+
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    #Verificar se os dados do json está no formato válido 
+    if not username or not password:
+        return jsonify({ "msg": "Usuario e senha incompleto !"}), 400 
+    
+    #Verificar se o usuario existe e a senha está correta
+    if username in users and users[username] == password:
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
+    else:
+        return jsonify({"msg": "Usuário e senhas inválidos"}), 401
+
+
+
 
 
 
