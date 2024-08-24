@@ -20,12 +20,12 @@ def listar_usuarios(conexao):
 def inserir_usuario_bd(conexao, login,senha):
     criptografia = bcrypt.gensalt()
 
-    senha_criptografada = bcrypt.generate_password_hash(senha)
+    #senha_criptografada = bcrypt.generate_password_hash(senha)
     #senha_criptografada = bcrypt.hashpw(senha, criptografia)
     #print(senha_criptografada)
 
     cursor = conexao.cursor()
-    cursor.execute("insert into usuario (login,senha)  values (%s, %s)", (login,senha_criptografada))
+    cursor.execute("insert into usuario (login,senha)  values (%s, %s)", (login,senha))
     conexao.commit()
 
 def alterar_usuario_bd(conexao, id, login,senha):
@@ -54,18 +54,11 @@ def consultar_usuario_por_id_bd(conexao, id):
 def verificar_login(conexao, login,senha):
     cursor = conexao.cursor()
     cursor.execute(" select id,login,senha from usuario"+
-                   " where login = '" + login+ "'")
+                   " where login = '" + login+ "'", '"' + senha+ "'")
     registro = cursor.fetchone()
 
     if registro:
-        senha_do_banco = registro[2]
-        pw_validacao = bcrypt.checkpw(senha_do_banco, senha)
-        print(pw_validacao)
-
-        if pw_validacao is True:
-           return "Login bem sucedido"
-        else:
-           return "Login falhou. Verifique o usuario e a senha"
+        return True
     else:
-        return "Login falhou. Verifique o usuario!"
+        return False
 

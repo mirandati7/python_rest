@@ -23,18 +23,15 @@ app.config['JWT_SECRET_KEY'] = 'designcursos'  # Use uma chave segura em produç
 jwt = JWTManager(app)
 
 
-users = {
-    "user1": "password1",
-    "user2": "password2"
-}
-
 @app.route("/livros/<int:id>", methods=["GET"])
+@jwt_required()
 def get_livro(id):
    conexao = conecta_db()
    livros = consultar_por_id(conexao,id)
    return jsonify(livros)
 
 @app.route("/livros", methods=["POST"])
+@jwt_required()
 def inserir_livro():
     conexao = conecta_db()
     data = request.get_json()
@@ -45,6 +42,7 @@ def inserir_livro():
     return jsonify(data)
 
 @app.route("/livros/<int:id>", methods=["PUT"])
+@jwt_required()
 def alterar_livro(id):
     conexao = conecta_db()
     data = request.get_json()
@@ -54,6 +52,7 @@ def alterar_livro(id):
 
 
 @app.route("/livros/<int:id>", methods=["DELETE"])
+@jwt_required()
 def excluir_livro(id):
     conexao = conecta_db()
     deletar(conexao,id)
@@ -61,12 +60,14 @@ def excluir_livro(id):
 
 
 @app.route("/livros", methods=["GET"])
+@jwt_required()
 def listar_todos():
     conexao = conecta_db()
     livros = consultar(conexao)
     return jsonify(livros)
 
 @app.route("/autores", methods=["GET"])
+@jwt_required()
 def listar_todos_autores():
     conexao = conecta_db()
     autores = listar_autores(conexao)
@@ -74,6 +75,7 @@ def listar_todos_autores():
 
 
 @app.route("/autores", methods=["POST"])
+@jwt_required()
 def inserir_autor():
     conexao = conecta_db()
     data = request.get_json()
@@ -82,6 +84,7 @@ def inserir_autor():
     return jsonify(data)
 
 @app.route("/autores/<int:id>", methods=["PUT"])
+@jwt_required()
 def update_autor(id):
     conexao = conecta_db()
     data = request.get_json()
@@ -91,6 +94,7 @@ def update_autor(id):
 
 
 @app.route("/autores/<int:id>", methods=["DELETE"])
+@jwt_required()
 def excluir_autor(id):
     conexao = conecta_db()
     deletar_autor_bd(conexao,id)
@@ -98,6 +102,7 @@ def excluir_autor(id):
 
 
 @app.route("/autores/<int:id>", methods=["GET"])
+@jwt_required()
 def consultar_autor_por_id(id):
     conexao = conecta_db()
     autor = consultar_autor_por_id_bd(conexao,id)
@@ -105,6 +110,7 @@ def consultar_autor_por_id(id):
 
 
 @app.route("/usuarios", methods=["GET"])
+@jwt_required()
 def listar_todos_usuarios():
     conexao = conecta_db()
     usuarios = listar_usuarios(conexao)
@@ -112,6 +118,7 @@ def listar_todos_usuarios():
 
 
 @app.route("/usuarios", methods=["POST"])
+@jwt_required()
 def inserir_usuario():
     conexao = conecta_db()
     data = request.get_json()
@@ -121,6 +128,7 @@ def inserir_usuario():
     return jsonify(data)
 
 @app.route("/usuarios/<int:id>", methods=["PUT"])
+@jwt_required()
 def update_usuario(id):
     conexao = conecta_db()
     data = request.get_json()
@@ -131,6 +139,7 @@ def update_usuario(id):
 
 
 @app.route("/usuarios/<int:id>", methods=["DELETE"])
+@jwt_required()
 def excluir_usuario(id):
     conexao = conecta_db()
     deletar_usuario_bd(conexao,id)
@@ -138,6 +147,7 @@ def excluir_usuario(id):
 
 
 @app.route("/usuarios/<int:id>", methods=["GET"])
+@jwt_required()
 def consultar_usuario_por_id(id):
     conexao = conecta_db()
     autor = consultar_usuario_por_id_bd(conexao,id)
@@ -161,6 +171,7 @@ def autenticar():
 
 
 @app.route("/editoras", methods=["POST"])
+@jwt_required()
 def inserir_editora():
     conexao = conecta_db()
     data = request.get_json()
@@ -181,9 +192,12 @@ def login():
     #Verificar se os dados do json está no formato válido 
     if not username or not password:
         return jsonify({ "msg": "Usuario e senha incompleto !"}), 400 
+   
+    conexao = conecta_db()
+    validar_login = verificar_login(conexao, username, password)
     
     #Verificar se o usuario existe e a senha está correta
-    if username in users and users[username] == password:
+    if validar_login:
         access_token = create_access_token(identity=username)
         return jsonify(access_token=access_token), 200
     else:
@@ -191,8 +205,12 @@ def login():
 
 
 
-
-
+@app.route('/url-protegida', methods=['GET'])
+@jwt_required()
+def url_protegida():
+    current_user = get_jwt_identity()
+    return jsonify({"msg": "protegida " + current_user}),200
+ 
 
 if __name__ == "__main__":
     app.run(debug=True)
